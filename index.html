@@ -1,68 +1,176 @@
- <!-- 
-  1. Doctype version html usamos 5  
-  -->
- <!DOCTYPE html>
-<html lang="en">  <!-- inicio-->
-<head> <!-- Metadatos, titulos , links css , js -->
-    <meta charset="UTF-8">  <!-- etiquetas hijas -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagina nahuel</title> <!-- le doy el nombre a la pagina -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tienda de Hardware Roja y Blanca</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #fff; color: #111; }
+    header { background: #c00; color: #fff; padding: 14px 18px; }
+    header .wrap { max-width: 1100px; margin: auto; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 22px; margin: 0; }
+    .container { max-width: 1100px; margin: auto; padding: 16px; }
+
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .controls input, .controls select, .controls button { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    .controls button { background: #c00; color: #fff; border: none; cursor: pointer; }
+    .controls button:hover { background: #a00; }
+
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 700px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 460px)  { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+    .card img { width: 100%; height: 160px; object-fit: cover; border-bottom: 3px solid #c00; }
+    .card .info { padding: 10px; display: grid; gap: 6px; }
+    .card .title { font-weight: bold; font-size: 15px; }
+    .card .price { color: #c00; font-weight: bold; }
+    .card .meta { font-size: 12px; color: #666; }
+    .card .btns { display: flex; gap: 6px; padding: 10px; border-top: 1px solid #eee; }
+    .btn { padding: 8px; border-radius: 6px; border: 1px solid #c00; background: #fff; color: #c00; cursor: pointer; }
+    .btn.primary { background: #c00; color: #fff; }
+
+    #cartPanel { position: fixed; right: -380px; top: 0; width: 360px; height: 100%; background: #fff; border-left: 3px solid #c00; transition: right .2s linear; display: flex; flex-direction: column; }
+    #cartPanel.open { right: 0; }
+    #cartHead { padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; align-items: center; background: #c00; color: #fff; }
+    #cartList { padding: 10px; display: grid; gap: 8px; overflow: auto; }
+    .cartItem { border: 1px solid #eee; border-radius: 6px; padding: 8px; display: grid; grid-template-columns: 56px 1fr auto; gap: 8px; align-items: center; }
+    .cartItem img { width: 56px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #c00; }
+    .qtyBox { display: inline-flex; border: 1px solid #c00; border-radius: 6px; overflow: hidden; }
+    .qtyBox button { background: #f6f6f6; border: none; padding: 4px 8px; cursor: pointer; color: #c00; }
+    .qtyBox input { width: 34px; border: none; text-align: center; color: #c00; }
+    #cartFoot { margin-top: auto; border-top: 1px solid #eee; padding: 10px; display: grid; gap: 8px; }
+    .row { display: flex; justify-content: space-between; }
+  </style>
 </head>
 <body>
-   <!-- definimos estructura semantica -->   
-     
-    <header> 
-         
-     <!--contiene titulos principales -->     
-     <h1> TALENTO GOAT </h1> <!-- usar h1 una sola vez-->
-      
-     <h2> h2 </h2>
-       
-     <h3 > h3</h3> 
-      
-     <h4> h4 </h4> 
-      
-     <h5> h5</h5> 
-      
-     <h6>h6</h6> 
+  <header>
+    <div class="wrap">
+      <h1>Tienda de Hardware</h1>
+      <button id="btnCarrito" class="btn primary">🛒 Carrito (<span id="cartCount">0</span>)</button>
+    </div>
+  </header>
 
-      
-     <nav>
-          
-     Links del sitio 
-     <!-- LINKS DEL SITIO--> 
-    <main> 
-         
-      <section> 
-        seccion 1  
+  <div class="container">
+    <div class="controls">
+      <input type="search" id="txtBuscar" placeholder="Buscar...">
+      <select id="selCategoria">
+        <option value="Todos">Todos</option>
+        <option value="Placas de video">Placas de video</option>
+        <option value="Procesadores">Procesadores</option>
+        <option value="Monitores">Monitores</option>
+        <option value="Periféricos">Periféricos</option>
+      </select>
+      <select id="selOrden">
+        <option value="destacados">Destacados</option>
+        <option value="precio-asc">Precio ↑</option>
+        <option value="precio-desc">Precio ↓</option>
+      </select>
+      <button id="btnLimpiar">Limpiar</button>
+    </div>
+    <section id="zonaProductos" class="grid"></section>
+  </div>
 
-        <p>Hola <br> soy un parrafo</p>  <strong> Negrita</strong>
-         
-        <p> Hola soy parrafo 2</p>
+  <aside id="cartPanel">
+    <div id="cartHead">
+      <span>Tu Carrito</span>
+      <button id="btnCerrarCarrito" class="btn">X</button>
+    </div>
+    <div id="cartList"></div>
+    <div id="cartFoot">
+      <div class="row"><span>Subtotal</span><strong id="lblSubtotal">$0</strong></div>
+      <div class="row"><span>Envío</span><strong id="lblEnvio">$0</strong></div>
+      <div class="row" style="font-size:18px"><span>Total</span><strong id="lblTotal">$0</strong></div>
+      <button id="btnComprar" class="btn primary">Finalizar compra</button>
+      <button id="btnVaciar" class="btn">Vaciar carrito</button>
+    </div>
+  </aside>
 
+  <script>
+    var productos = [
+      {id:1, nombre:'Intel Core i7-12700K', precio:559999, categoria:'Procesadores', img:'intel 7.svg'},
+      {id:2, nombre:'AMD Ryzen 7 5800X3D', precio:649999, categoria:'Procesadores', img:'ryzen 7.jpg'},
+      {id:3, nombre:'Monitor Zowie 144Hz', precio:429999, categoria:'Monitores', img:'zowie 144.jpg'}
+    ];
 
-      </section> 
-        
-      <section> 
-         
-        seccion 2
-      </section> 
+    var carrito = [];
 
-       <section> 
-         
-        seccion 3
-       </section>
-    </main>
-     
-    <footer> 
-         
-    hola soy el foter
+    function money(n){ return new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS'}).format(n); }
 
-    </footer>
-         
-     </nav> 
+    function renderProductos(){
+      var q=document.getElementById('txtBuscar').value.toLowerCase();
+      var cat=document.getElementById('selCategoria').value;
+      var lista=productos.filter(p=>(p.nombre.toLowerCase().includes(q)||p.categoria.toLowerCase().includes(q))&&(cat==='Todos'||p.categoria===cat));
+      var html='';
+      lista.forEach(p=>{
+        html+=`<article class='card'>
+          <img src='${p.img}' alt='${p.nombre}'>
+          <div class='info'>
+            <div class='meta'>${p.categoria}</div>
+            <div class='title'>${p.nombre}</div>
+            <div class='price'>${money(p.precio)}</div>
+          </div>
+          <div class='btns'>
+            <button class='btn primary' onclick='agregar(${p.id})'>Agregar</button>
+          </div>
+        </article>`;
+      });
+      document.getElementById('zonaProductos').innerHTML=html||'<p>No hay resultados.</p>';
+    }
 
-    </header>
+    function agregar(id){
+      var item=carrito.find(i=>i.id===id);
+      if(item)item.cant++; else{
+        var p=productos.find(x=>x.id===id);
+        carrito.push({id:p.id,nombre:p.nombre,precio:p.precio,img:p.img,cant:1});
+      }
+      renderCarrito();
+    }
 
+    function quitar(id){ carrito=carrito.filter(i=>i.id!==id); renderCarrito(); }
+
+    function cambiar(id,c){ if(c<1)c=1; carrito.find(i=>i.id===id).cant=c; renderCarrito(); }
+
+    function renderCarrito(){
+      var html=''; var subtotal=0;
+      carrito.forEach(i=>{
+        subtotal+=i.precio*i.cant;
+        html+=`<div class='cartItem'>
+          <img src='${i.img}' alt='${i.nombre}'>
+          <div>
+            <div><b>${i.nombre}</b></div>
+            <div style='font-size:12px'>${money(i.precio)} c/u</div>
+            <div class='qtyBox'>
+              <button onclick='cambiar(${i.id},${i.cant-1})'>-</button>
+              <input value='${i.cant}' oninput='cambiar(${i.id},parseInt(this.value)||1)'>
+              <button onclick='cambiar(${i.id},${i.cant+1})'>+</button>
+            </div>
+          </div>
+          <div style='text-align:right'>
+            <div><b>${money(i.precio*i.cant)}</b></div>
+            <button class='btn' onclick='quitar(${i.id})'>Quitar</button>
+          </div>
+        </div>`;
+      });
+      if(!html)html='<p>Carrito vacío.</p>';
+      document.getElementById('cartList').innerHTML=html;
+      document.getElementById('lblSubtotal').textContent=money(subtotal);
+      document.getElementById('lblEnvio').textContent=money(0);
+      document.getElementById('lblTotal').textContent=money(subtotal);
+      document.getElementById('cartCount').textContent=carrito.reduce((a,b)=>a+b.cant,0);
+    }
+
+    document.getElementById('btnCarrito').onclick=()=>document.getElementById('cartPanel').classList.add('open');
+    document.getElementById('btnCerrarCarrito').onclick=()=>document.getElementById('cartPanel').classList.remove('open');
+    document.getElementById('btnVaciar').onclick=()=>{carrito=[];renderCarrito();};
+    document.getElementById('btnComprar').onclick=()=>alert('Compra simulada. Total: '+document.getElementById('lblTotal').textContent);
+
+    document.getElementById('txtBuscar').oninput=renderProductos;
+    document.getElementById('selCategoria').onchange=renderProductos;
+    document.getElementById('btnLimpiar').onclick=()=>{document.getElementById('txtBuscar').value='';document.getElementById('selCategoria').value='Todos';renderProductos();};
+
+    renderProductos();
+  </script>
 </body>
-</html> <!--cierre-->
+</html>
